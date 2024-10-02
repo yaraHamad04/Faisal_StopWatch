@@ -6,7 +6,7 @@ import android.os.SystemClock;
 import android.widget.Button;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
-
+// This was done by Faisal and Samer
 public class MainActivity extends AppCompatActivity {
 
     private TextView tvTime;
