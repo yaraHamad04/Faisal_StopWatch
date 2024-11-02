@@ -6,7 +6,7 @@ import android.os.SystemClock;
 import android.widget.Button;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
-// This was done by Faisal and Samer
+
 public class MainActivity extends AppCompatActivity {
 
     private TextView tvTime;
@@ -32,45 +32,46 @@ public class MainActivity extends AppCompatActivity {
             public void run() {
                 timeInMilliseconds = SystemClock.uptimeMillis() - startTime;
                 updateTime = timeSwapBuff + timeInMilliseconds;
-
-                int secs = (int) (updateTime / 1000);
-                int mins = secs / 60;
-                secs = secs % 60;
-                tvTime.setText(String.format("%02d:%02d", mins, secs));
-
-                handler.postDelayed(this, 1000);
+                updateDisplay();
+                handler.postDelayed(this, 1000); // Update every 1 second
             }
         };
 
         // Start Button Click Event
         btnStart.setOnClickListener(v -> {
             startTime = SystemClock.uptimeMillis();
-            handler.postDelayed(updateTimerThread, 1000);
-            btnStart.setEnabled(false);
-            btnStop.setEnabled(true);
-            btnReset.setEnabled(true);
+            handler.post(updateTimerThread);
+            updateButtonStates(false, true, true);
         });
 
         // Stop Button Click Event
         btnStop.setOnClickListener(v -> {
             timeSwapBuff += timeInMilliseconds;
             handler.removeCallbacks(updateTimerThread);
-            btnStart.setEnabled(true);
-            btnStop.setEnabled(false);
+            updateButtonStates(true, false, true);
         });
 
         // Reset Button Click Event
         btnReset.setOnClickListener(v -> {
-            startTime = 0L;
-            timeSwapBuff = 0L;
-            timeInMilliseconds = 0L;
-            updateTime = 0L;
-            tvTime.setText("00:00");
-            btnStart.setEnabled(true);
-            btnStop.setEnabled(false);
-            btnReset.setEnabled(false);
+            startTime = timeSwapBuff = timeInMilliseconds = updateTime = 0L;
+            updateDisplay();
             handler.removeCallbacks(updateTimerThread);
-
+            updateButtonStates(true, false, false);
         });
+    }
+
+    // Helper method to update the displayed time
+    private void updateDisplay() {
+        int secs = (int) (updateTime / 1000);
+        int mins = secs / 60;
+        secs %= 60;
+        tvTime.setText(String.format("%02d:%02d", mins, secs));
+    }
+
+    // Helper method to enable/disable buttons
+    private void updateButtonStates(boolean start, boolean stop, boolean reset) {
+        btnStart.setEnabled(start);
+        btnStop.setEnabled(stop);
+        btnReset.setEnabled(reset);
     }
 }
