@@ -14,6 +14,8 @@ public class MainActivity extends AppCompatActivity {
     private Handler handler;
     private long startTime = 0L, timeInMilliseconds = 0L, timeSwapBuff = 0L, updateTime = 0L;
     private Runnable updateTimerThread;
+    private boolean isRunning = false;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
         btnStart.setOnClickListener(v -> {
             startTime = SystemClock.uptimeMillis();
             handler.post(updateTimerThread);
+            isRunning = true;
             updateButtonStates(false, true, true);
         });
 
@@ -48,6 +51,7 @@ public class MainActivity extends AppCompatActivity {
         btnStop.setOnClickListener(v -> {
             timeSwapBuff += timeInMilliseconds;
             handler.removeCallbacks(updateTimerThread);
+            isRunning = true;
             updateButtonStates(true, false, true);
         });
 
@@ -56,8 +60,23 @@ public class MainActivity extends AppCompatActivity {
             startTime = timeSwapBuff = timeInMilliseconds = updateTime = 0L;
             updateDisplay();
             handler.removeCallbacks(updateTimerThread);
+            isRunning = true;
             updateButtonStates(true, false, false);
         });
+
+        if (savedInstanceState != null) {
+            updateTime = savedInstanceState.getLong("updateTime", 0L);
+            timeSwapBuff = savedInstanceState.getLong("timeSwapBuff", 0L);
+            isRunning = savedInstanceState.getBoolean("isRunning", false);
+
+            updateDisplay();
+
+            if (isRunning) {
+                startTime = SystemClock.uptimeMillis();
+                updateButtonStates(true, false, true);
+            }
+        }
+
     }
 
     // Helper method to update the displayed time
@@ -74,4 +93,13 @@ public class MainActivity extends AppCompatActivity {
         btnStop.setEnabled(stop);
         btnReset.setEnabled(reset);
     }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putLong("updateTime", updateTime);
+        outState.putLong("timeSwapBuff", timeSwapBuff);
+        outState.putBoolean("isRunning", isRunning);
+    }
+
 }
